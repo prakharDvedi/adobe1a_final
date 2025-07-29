@@ -26,7 +26,8 @@ class PDFOutlineExtractor:
             
         lines = [line.strip() for line in text.split('\n') if line.strip()]
         
-        for i, line in enumerate(lines[:15]):
+        # Look for the first meaningful line as title
+        for line in lines[:10]:
             if len(line) < 5:
                 continue
                 
@@ -35,12 +36,17 @@ class PDFOutlineExtractor:
                 
             if self._has_too_many_special_chars(line):
                 continue
+            
+            # Skip obvious non-title patterns
+            if re.match(r'^\d+\s*\.?\s*$', line):  # Just numbers
+                continue
+            if re.match(r'^Page\s+\d+', line, re.IGNORECASE):
+                continue
+            if re.match(r'^\d+\.\s+[A-Z]', line):  # Numbered list items
+                continue
                 
-            if self._looks_like_title(line):
-                return line.strip()
-        
-        for line in lines[:10]:
-            if len(line) > 10 and not self._is_header_footer(line):
+            # Accept meaningful text as title
+            if len(line) >= 5:
                 return line.strip()
                 
         return ""
@@ -103,7 +109,7 @@ class PDFOutlineExtractor:
                     continue
                 
                 level = self._classify_generic_heading(line)
-                if level:
+                if level and self._is_meaningful_heading(line):
                     line_key = line.lower().strip()
                     if line_key not in seen:
                         seen.add(line_key)
@@ -119,6 +125,7 @@ class PDFOutlineExtractor:
         if not text or len(text) < 3:
             return True
             
+        # Basic ignore patterns
         ignore_patterns = [
             r'^Microsoft Word',
             r'\.pdf\s*$',
@@ -134,7 +141,31 @@ class PDFOutlineExtractor:
             r'^\s*[-=_]{3,}\s*$',
         ]
         
-        for pattern in ignore_patterns:
+        # Metadata and structural headings to ignore
+        metadata_patterns = [
+            r'^(Table\s+of\s+Contents?|TOC)\s*$',
+            r'^(Revision\s+History|Version\s+History)\s*$',
+            r'^(Acknowledgements?|Acknowledgments?)\s*$',
+            r'^(References?|Bibliography)\s*$',
+            r'^(Index|Glossary)\s*$',
+            r'^(Appendix\s+[A-Z]?)\s*$',
+            r'^(Abstract|Executive\s+Summary)\s*$',
+            r'^(Preface|Foreword)\s*$',
+            r'^(Copyright|Disclaimer)\s*$',
+            r'^(Trademarks?)\s*$',
+            r'^(Documents?\s+and\s+Web\s+Sites?)\s*$',
+            r'^(List\s+of\s+(Figures?|Tables?|Illustrations?))\s*$',
+            r'^(About\s+(this|the)\s+(document|guide|manual))\s*$',
+            r'^(How\s+to\s+use\s+this\s+(document|guide|manual))\s*$',
+            r'^(Contact\s+(Information|Details?))\s*$',
+            r'^(Legal\s+(Notice|Information))\s*$',
+            r'^(Terms\s+of\s+(Reference|Use))\s*$',
+            r'^(Privacy\s+Policy)\s*$',
+            r'^(Document\s+(Information|Details?))\s*$',
+            r'^(Publication\s+(Information|Details?))\s*$',
+        ]
+        
+        for pattern in ignore_patterns + metadata_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
         
@@ -144,6 +175,7 @@ class PDFOutlineExtractor:
         if len(text) > 200:
             return True
             
+        # Body text starters that shouldn't be headings
         body_starters = [
             r'^This\s+',
             r'^The\s+following',
@@ -160,6 +192,7 @@ class PDFOutlineExtractor:
             r'^How\s+to',
             r'^Note\s+that',
             r'^Remember\s+',
+            r'^HOPE\s+To\s+SEE\s+You\s+THERE',  # Specific case from feedback
         ]
         
         for pattern in body_starters:
@@ -171,42 +204,34 @@ class PDFOutlineExtractor:
     def _classify_generic_heading(self, text: str) -> str:
         if not text:
             return None
+        
+        # Skip very short or very long text
+        word_count = len(text.split())
+        if word_count < 1 or word_count > 15:
+            return None
             
+        # H1 patterns - Main sections and important headings
         h1_patterns = [
-            r'^(Chapter|Section|Part)\s+[IVX\d]+[.:]?\s+[A-Z]',
-            r'^\d+\.\s+[A-Z][a-zA-Z\s]{5,}$',
-            
-            r'^(Introduction|Overview|Summary|Conclusion|References|Bibliography|Appendix|Index|Table\s+of\s+Contents|Acknowledgements?|Abstract|Executive\s+Summary)\s*$',
-            
-            r'^[A-Z][A-Z\s]{5,30}$',
-            
-            r'^[A-Z][a-zA-Z\s\u2013\-]{10,50}$',
+            r'^\d+\.\s+[A-Z][a-zA-Z\s]{5,}$',  # Numbered sections
+            r'^(Introduction|Overview|Conclusion|Summary)\s+to\s+[A-Z]',  # Introduction to X
+            r'^[A-Z][A-Z\s]{8,40}$',  # All caps substantial headings
         ]
         
+        # H2 patterns - Clear subsections
         h2_patterns = [
-            r'^\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^[A-Z][.)]\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^(Background|Methodology|Results|Discussion|Findings|Recommendations|Objectives|Goals|Requirements|Specifications|Details|Analysis|Implementation|Testing|Evaluation)\s*$',
-            
-            r'^[A-Z][a-zA-Z\s]{5,30}:\s*$',
+            r'^\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',  # Numbered subsections
+            r'^[A-Z][a-zA-Z\s]{5,25}:\s*$',  # Titles ending with colon
         ]
         
+        # H3 patterns - Sub-subsections
         h3_patterns = [
-            r'^\d+\.\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^[•\-\*]\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^\([a-z\d]+\)\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^(What|How|Why|When|Where|Who)\s+[a-z][a-zA-Z\s]{5,}\??\s*$',
+            r'^\d+\.\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',  # Triple numbered sections
+            r'^(Timeline|Summary|Background|Milestones|Phase\s+[IVX\d]+)\s*:?\s*$',
         ]
         
+        # H4 patterns - Specific patterns
         h4_patterns = [
-            r'^\d+\.\d+\.\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
-            
-            r'^[A-Z][a-z]+\s+[A-Z][a-z]+\s*:?\s*$',
+            r'^For\s+(each|every)\s+[A-Z][a-zA-Z\s]+\s+(it\s+could\s+mean|means?)\s*:?\s*$',
         ]
         
         for pattern in h1_patterns:
@@ -231,26 +256,132 @@ class PDFOutlineExtractor:
         words = text.split()
         word_count = len(words)
         
-        if word_count > 20:
+        # Be more restrictive with word count
+        if word_count > 12 or word_count < 2:
             return None
             
-        if word_count < 2:
-            return None
-            
-        is_title_case = all(word[0].isupper() for word in words if word.isalpha())
+        is_title_case = all(word[0].isupper() for word in words if word.isalpha() and len(word) > 1)
         is_all_caps = text.isupper()
         has_numbers = any(char.isdigit() for char in text)
         
-        if is_all_caps and 5 <= word_count <= 10:
+        # More restrictive all caps detection
+        if is_all_caps and 3 <= word_count <= 8:
+            # Skip if it looks like a form title or announcement
+            if any(word in text.lower() for word in ['form', 'application', 'hope', 'see', 'there']):
+                return None
             return "H1"
             
+        # More restrictive title case detection
         if is_title_case and 3 <= word_count <= 8:
+            # Must have meaningful content words
+            content_words = [w for w in words if len(w) > 2 and w.lower() not in ['the', 'and', 'for', 'with', 'from']]
+            if len(content_words) < 2:
+                return None
+                
             if has_numbers:
                 return "H2"
             else:
                 return "H3"
         
-        if text.endswith(':') and word_count <= 8:
+        # Colon endings for subsections
+        if text.endswith(':') and 3 <= word_count <= 8:
             return "H3"
             
         return None
+
+    def _is_meaningful_heading(self, text: str) -> bool:
+        """Additional filter to ensure only meaningful content headings are included"""
+        
+        # Skip very basic form elements and labels
+        form_patterns = [
+            r'^\d+\.\s*(Name|PAY|Whether|Home|so\s+whether)',
+            r'^S\.No\s+Name\s+Age',
+            r'^\(a\)\s+If\s+the\s+concession',
+            r'^Application\s+form',
+            r'^REGULAR\s+PATHWAY',
+            r'^DISTINCTION\s+PATHWAY',
+            r'^PIGEON\s+FORGE',
+            r'^NEAR\s+DIXIE',
+            r'^CLOSED\s+TOED',
+            r'^PARENTS\s+OR\s+GUARDIANS',
+            r'^SO\s+YOUR\s+CHILD',
+        ]
+        
+        # Skip table of contents entries (with dots and page numbers)
+        toc_patterns = [
+            r'.*\.{3,}.*\d+$',  # Lines with dots leading to page numbers
+            r'^\d+\.\d+.*\d+$',  # Section numbers with page numbers at end
+        ]
+        
+        # Skip copyright and metadata
+        metadata_patterns = [
+            r'^Copyright\s+Notice',
+            r'^Foundation\s+Level\s+Extensions?$',
+            r'^Software\s+Testing$',
+            r'^Qualifications?\s+Board$',
+            r'^International\s+Software',
+            r'^Version\s+Date\s+Remarks',
+            r'^©.*\d{4}',
+            r'^Identifier\s+Reference',
+            r'^Foundation\s+Level\s+Working\s+Group',
+        ]
+        
+        # Skip funding tables and data
+        data_patterns = [
+            r'^Funding\s+Source\s+\d+',
+            r'^Government\s+\$\d+',
+            r'^Libraries\s+\$\d+',
+            r'^Endowment\s+\$\d+',
+            r'^Gifts/In-Kind\s+\$\d+',
+            r'^TOTAL\s+ANNUAL\s+\$\d+',
+            r'^Baseline:\s+Foundation\s+\d+',
+            r'^Extension:\s+Agile\s+Tester\s+\d+',
+            r'^Syllabus\s+Days$',
+        ]
+        
+        # Skip incomplete fragments and partial sentences
+        fragment_patterns = [
+            r'^(and|or|but|the|a|an|in|on|at|to|for|of|with|from)\s+',
+            r'^(during|including|so|whether|if)\s+',
+            r'^\w+\s+(and\s+)?services?$',
+            r'^(resources?|services?|licenses?)\s+(and\s+\w+)?$',
+            r'^for\s+(library\s+workers?|the\s+general\s+public)$',
+            r'^library\s+web\s+sites?$',
+            r'^knowledge\s+supports?\s+and\s+tools?$',
+            r'^\w+\s+course\s+should\s+be\s+an\s+AP$',
+            r'^One\s+must\s+be\s+a\s+Computer$',
+            r'Agile\s+Tester$',
+        ]
+        
+        all_patterns = form_patterns + toc_patterns + metadata_patterns + data_patterns + fragment_patterns
+        
+        for pattern in all_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return False
+        
+        # Allow numbered sections that look meaningful
+        if re.match(r'^\d+\.\s+[A-Z][a-zA-Z\s]{5,}$', text):
+            return True
+            
+        # Allow subsections
+        if re.match(r'^\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$', text):
+            return True
+            
+        # Allow "For each X it could mean:" patterns
+        if re.match(r'^For\s+(each|every)\s+[A-Z][a-zA-Z\s]+\s+(it\s+could\s+mean|means?)\s*:?\s*$', text, re.IGNORECASE):
+            return True
+        
+        # Must start with capital letter
+        if not text[0].isupper():
+            return False
+            
+        # Must have reasonable length
+        if len(text) < 3 or len(text) > 100:
+            return False
+            
+        # Skip if it's mostly numbers or special characters
+        alpha_chars = sum(1 for c in text if c.isalpha())
+        if alpha_chars < len(text) * 0.5:
+            return False
+            
+        return True

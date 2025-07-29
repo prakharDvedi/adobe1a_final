@@ -1,80 +1,15 @@
 {
-  "title": "Select Visio layers to convert (Acrobat Pro)",
+  "title": "Note: If you select Retain Some Layers In The Selected Page, you’ll be prompted to",
   "outline": [
-    {
-      "level": "H2",
-      "text": "of the following:",
-      "page": 0
-    },
-    {
-      "level": "H3",
-      "text": "• To convert the selected Visio layers to individual PDF layers within a PDF layer",
-      "page": 0
-    },
-    {
-      "level": "H3",
-      "text": "4. Optionally, do any of the following:",
-      "page": 0
-    },
-    {
-      "level": "H1",
-      "text": "Convert AutoCAD files when AutoCAD is installed",
-      "page": 2
-    },
-    {
-      "level": "H3",
-      "text": "2. Do one of the following:",
-      "page": 2
-    },
-    {
-      "level": "H2",
-      "text": "then click Continue:",
-      "page": 2
-    },
     {
       "level": "H1",
       "text": "Select AutoCAD layers to convert",
       "page": 3
     },
     {
-      "level": "H2",
-      "text": "following:",
-      "page": 3
-    },
-    {
-      "level": "H3",
-      "text": "• Choose an option from the Named Layer Filters menu to list all layers that fit",
-      "page": 3
-    },
-    {
-      "level": "H3",
-      "text": "• Select the Invert option to list all layers except those layers that are described",
-      "page": 3
-    },
-    {
-      "level": "H3",
-      "text": "• To convert the selected AutoCAD layers to individual layers within a PDF layer",
-      "page": 3
-    },
-    {
       "level": "H1",
       "text": "Convert AutoCAD files in batches",
       "page": 4
-    },
-    {
-      "level": "H2",
-      "text": "1. Choose Adobe PDF > Batch Conversion.",
-      "page": 4
-    },
-    {
-      "level": "H2",
-      "text": "4. Click Convert.",
-      "page": 4
-    },
-    {
-      "level": "H1",
-      "text": "Application-specific PDFMaker settings",
-      "page": 5
     },
     {
       "level": "H1",
@@ -94,11 +29,6 @@
     {
       "level": "H3",
       "text": "Enable Accessibility And Reflow With Tagged Adobe PDF",
-      "page": 5
-    },
-    {
-      "level": "H1",
-      "text": "Excel-specific options on the Settings tab",
       "page": 5
     },
     {
@@ -128,11 +58,6 @@
     },
     {
       "level": "H1",
-      "text": "PowerPoint-specific options on the Settings tab",
-      "page": 6
-    },
-    {
-      "level": "H1",
       "text": "Preserve Slide Transitions",
       "page": 6
     },
@@ -144,11 +69,6 @@
     {
       "level": "H1",
       "text": "Convert Speaker Notes",
-      "page": 6
-    },
-    {
-      "level": "H1",
-      "text": "Email-specific options on the Settings tab",
       "page": 6
     },
     {
@@ -227,7 +147,7 @@
       "page": 8
     },
     {
-      "level": "H1",
+      "level": "H3",
       "text": "Exclude Visio Objects With No Custom Properties",
       "page": 8
     },
@@ -242,19 +162,9 @@
       "page": 8
     },
     {
-      "level": "H1",
+      "level": "H3",
       "text": "Convert Displayed Comments To Notes In Adobe PDF",
       "page": 8
-    },
-    {
-      "level": "H1",
-      "text": "Reviewer",
-      "page": 8
-    },
-    {
-      "level": "H1",
-      "text": "Include",
-      "page": 9
     },
     {
       "level": "H1",
@@ -262,18 +172,8 @@
       "page": 9
     },
     {
-      "level": "H3",
-      "text": "# Of Comments",
-      "page": 9
-    },
-    {
       "level": "H1",
       "text": "Convert Footnote And Endnote Links",
-      "page": 9
-    },
-    {
-      "level": "H1",
-      "text": "Convert signature fields specified by pdfmarks",
       "page": 9
     },
     {
@@ -303,23 +203,8 @@
     },
     {
       "level": "H1",
-      "text": "Element",
-      "page": 10
-    },
-    {
-      "level": "H1",
-      "text": "Bookmark",
-      "page": 10
-    },
-    {
-      "level": "H1",
       "text": "Create PDFs by printing to file",
       "page": 11
-    },
-    {
-      "level": "H2",
-      "text": "5. Click Continue.",
-      "page": 12
     },
     {
       "level": "H1",
@@ -329,11 +214,6 @@
     {
       "level": "H1",
       "text": "Adobe PDF Security",
-      "page": 14
-    },
-    {
-      "level": "H2",
-      "text": "the security settings:",
       "page": 14
     },
     {
@@ -369,16 +249,6 @@
     {
       "level": "H1",
       "text": "Set Adobe PDF printer properties",
-      "page": 16
-    },
-    {
-      "level": "H2",
-      "text": "2. Choose Properties.",
-      "page": 16
-    },
-    {
-      "level": "H1",
-      "text": "Reassign the port that the Adobe PDF printer uses",
       "page": 16
     }
   ]
