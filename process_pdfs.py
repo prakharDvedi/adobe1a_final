@@ -9,86 +9,85 @@ class PDFOutlineExtractor:
     def extract_outline(self, pdf_path: str) -> Dict:
         try:
             with pdfplumber.open(pdf_path) as pdf:
-                # Determine document type first
-                doc_type = self._determine_document_type(pdf)
-                
-                if doc_type == "form":
-                    return {
-                        "title": "Application form for grant of LTC advance",
-                        "outline": []
-                    }
-                
-                title = self._extract_title(pdf, doc_type)
-                outline = self._extract_headings(pdf, doc_type)
+                title = self._extract_title(pdf)
+                outline = self._extract_headings(pdf)
                 
                 return {"title": title, "outline": outline}
         except Exception as e:
             return {"title": "", "outline": []}
 
-    def _determine_document_type(self, pdf) -> str:
-        """Determine document type to apply appropriate extraction rules"""
-        if pdf.pages:
-            text = pdf.pages[0].extract_text()
-            if text:
-                # Form document indicators
-                if ("Application form" in text and 
-                    "LTC advance" in text and
-                    "Government Servant" in text):
-                    return "form"
-                
-                # Manual/syllabus indicators
-                if "Foundation Level" in text and "Extensions" in text:
-                    return "manual"
-                
-                # RFP/report indicators  
-                if any(term in text for term in ['RFP', 'Request for Proposal', 'Digital Library']):
-                    return "report"
-                
-                # STEM/invitation indicators
-                if any(term in text for term in ['STEM Pathways', 'PATHWAY OPTIONS']):
-                    return "stem"
-                
-                # Party invitation
-                if any(term in text for term in ['PARTY', 'HOPE TO SEE']):
-                    return "invitation"
+    def _extract_title(self, pdf) -> str:
+        if not pdf.pages:
+            return ""
+            
+        text = pdf.pages[0].extract_text()
+        if not text:
+            return ""
+            
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
         
-        return "unknown"
-
-    def _extract_title(self, pdf, doc_type: str) -> str:
-        """Extract title based on document type"""
-        if doc_type == "form":
-            return "Application form for grant of LTC advance"
+        for i, line in enumerate(lines[:15]):
+            if len(line) < 5:
+                continue
+                
+            if self._is_header_footer(line):
+                continue
+                
+            if self._has_too_many_special_chars(line):
+                continue
+                
+            if self._looks_like_title(line):
+                return line.strip()
         
-        if pdf.pages:
-            text = pdf.pages[0].extract_text()
-            if text:
-                lines = [line.strip() for line in text.split('\n') if line.strip()]
+        for line in lines[:10]:
+            if len(line) > 10 and not self._is_header_footer(line):
+                return line.strip()
                 
-                if doc_type == "manual":
-                    for line in lines[:10]:
-                        if "Foundation Level Extensions" in line:
-                            return "Overview Foundation Level Extensions"
-                
-                elif doc_type == "report":
-                    for line in lines[:5]:
-                        if any(term in line for term in ['RFP', 'Request for Proposal']):
-                            return line.strip()
-                
-                elif doc_type == "stem":
-                    for line in lines[:5]:
-                        if "STEM Pathways" in line:
-                            return line.strip()
-                
-                elif doc_type == "invitation":
-                    return ""  # Empty title for invitation
-        
         return ""
 
-    def _extract_headings(self, pdf, doc_type: str) -> List[Dict]:
-        """Extract headings based on document type"""
-        if doc_type == "form":
-            return []  # Forms have no structural headings
+    def _is_header_footer(self, text: str) -> bool:
+        header_footer_patterns = [
+            r'^Page\s+\d+',
+            r'^\d+\s*$',
+            r'^www\.',
+            r'@.*\.com',
+            r'^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}',
+            r'^Microsoft\s+Word',
+            r'\.pdf\s*$',
+            r'\.doc\s*$',
+        ]
         
+        for pattern in header_footer_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+        return False
+
+    def _has_too_many_special_chars(self, text: str) -> bool:
+        special_chars = sum(1 for c in text if not c.isalnum() and c not in ' -.,()[]{}:;')
+        return special_chars > len(text) * 0.3
+
+    def _looks_like_title(self, text: str) -> bool:
+        word_count = len(text.split())
+        
+        if not (2 <= word_count <= 15):
+            return False
+            
+        if not text[0].isupper():
+            return False
+            
+        if text.isupper() and len(text) > 20:
+            return False
+            
+        body_endings = [
+            'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with'
+        ]
+        last_word = text.split()[-1].lower().rstrip('.,;:')
+        if last_word in body_endings:
+            return False
+            
+        return True
+
+    def _extract_headings(self, pdf) -> List[Dict]:
         headings = []
         seen = set()
         
@@ -100,10 +99,10 @@ class PDFOutlineExtractor:
             lines = [line.strip() for line in text.split('\n') if line.strip()]
             
             for line in lines:
-                if self._should_ignore(line):
+                if self._should_ignore_line(line):
                     continue
                 
-                level = self._classify_heading(line, doc_type)
+                level = self._classify_generic_heading(line)
                 if level:
                     line_key = line.lower().strip()
                     if line_key not in seen:
@@ -116,8 +115,7 @@ class PDFOutlineExtractor:
         
         return sorted(headings, key=lambda x: x['page'])
 
-    def _should_ignore(self, text: str) -> bool:
-        """Universal ignore patterns"""
+    def _should_ignore_line(self, text: str) -> bool:
         if not text or len(text) < 3:
             return True
             
@@ -125,125 +123,134 @@ class PDFOutlineExtractor:
             r'^Microsoft Word',
             r'\.pdf\s*$',
             r'\.doc\s*$',
-            r'^\d+$',  # Just numbers
+            r'^\d+\s*$',
             r'^Page\s+\d+',
             r'^www\.',
-            # Body text starters
-            r'^This\s+document',
-            r'^The\s+following',
-            r'^It\s+is',
-            r'^For\s+more',
-            r'^understanding\s+and',
-            r'^testing\s+acquired',
-            r'^will\s+outline',
+            r'@.*\.com',
+            r'^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}',  # dates
+            r'^[A-Z]{2,}\s+\d+',
+            r'^©.*\d{4}',
+            r'^\s*\|\s*',
+            r'^\s*[-=_]{3,}\s*$',
         ]
         
         for pattern in ignore_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
         
+        if self._has_too_many_special_chars(text):
+            return True
+            
+        if len(text) > 200:
+            return True
+            
+        body_starters = [
+            r'^This\s+',
+            r'^The\s+following',
+            r'^It\s+is',
+            r'^For\s+more',
+            r'^In\s+order\s+to',
+            r'^Please\s+',
+            r'^You\s+can',
+            r'^We\s+',
+            r'^If\s+you',
+            r'^To\s+',
+            r'^When\s+',
+            r'^Where\s+',
+            r'^How\s+to',
+            r'^Note\s+that',
+            r'^Remember\s+',
+        ]
+        
+        for pattern in body_starters:
+            if re.search(pattern, text, re.IGNORECASE):
+                return True
+        
         return False
 
-    def _classify_heading(self, text: str, doc_type: str) -> str:
-        """Classify heading based on document type"""
+    def _classify_generic_heading(self, text: str) -> str:
         if not text:
             return None
             
-        if doc_type == "manual":
-            return self._classify_manual_heading(text)
-        elif doc_type == "report":
-            return self._classify_report_heading(text)
-        elif doc_type == "stem":
-            return self._classify_stem_heading(text)
-        elif doc_type == "invitation":
-            return self._classify_invitation_heading(text)
-        
-        return None
-
-    def _classify_manual_heading(self, text: str) -> str:
-        """Manual/syllabus heading patterns"""
-        # H1 patterns
         h1_patterns = [
-            r'^Revision\s+History\s*$',
-            r'^Table\s+of\s+Contents\s*$',
-            r'^Acknowledgements\s*$',
-            r'^References\s*$',
-            r'^\d+\.\s+[A-Z][a-zA-Z\s\u2013\-]{10,}$',  # "1. Introduction to..."
+            r'^(Chapter|Section|Part)\s+[IVX\d]+[.:]?\s+[A-Z]',
+            r'^\d+\.\s+[A-Z][a-zA-Z\s]{5,}$',
+            
+            r'^(Introduction|Overview|Summary|Conclusion|References|Bibliography|Appendix|Index|Table\s+of\s+Contents|Acknowledgements?|Abstract|Executive\s+Summary)\s*$',
+            
+            r'^[A-Z][A-Z\s]{5,30}$',
+            
+            r'^[A-Z][a-zA-Z\s\u2013\-]{10,50}$',
         ]
         
-        # H2 patterns
         h2_patterns = [
-            r'^\d+\.\d+\s+[A-Z][a-zA-Z\s]{5,}$',  # "2.1 Intended Audience"
+            r'^\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^[A-Z][.)]\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^(Background|Methodology|Results|Discussion|Findings|Recommendations|Objectives|Goals|Requirements|Specifications|Details|Analysis|Implementation|Testing|Evaluation)\s*$',
+            
+            r'^[A-Z][a-zA-Z\s]{5,30}:\s*$',
         ]
         
-        for pattern in h1_patterns:
-            if re.match(pattern, text):
-                return "H1"
-        
-        for pattern in h2_patterns:
-            if re.match(pattern, text):
-                return "H2"
-        
-        return None
-
-    def _classify_report_heading(self, text: str) -> str:
-        """RFP/report heading patterns"""
-        # H1 patterns
-        h1_patterns = [
-            r'^[A-Z][a-zA-Z\s\u2019]{15,}$',  # Long title case like "Ontario's Digital Library"
-            r'^A\s+Critical\s+Component',     # Specific pattern
-        ]
-        
-        # H2 patterns  
-        h2_patterns = [
-            r'^Summary\s*$',
-            r'^Background\s*$',
-            r'^The\s+Business\s+Plan\s+to\s+be\s+Developed\s*$',
-            r'^Approach\s+and\s+Specific\s+Proposal\s+Requirements\s*$',
-            r'^Evaluation\s+and\s+Awarding\s+of\s+Contract\s*$',
-            r'^Appendix\s+[A-Z][:.]?\s+[A-Z][a-zA-Z\s\u2019&]+$',
-        ]
-        
-        # H3 patterns
         h3_patterns = [
-            r'^[A-Z][a-zA-Z\s\u2019]+:\s*$',  # "Timeline:", "Equitable access:"
-            r'^\d+\.\s+[A-Z][a-zA-Z\s]+$',    # "1. Preamble"
-            r'^Phase\s+[IVX]+[:.]?\s+[A-Z][a-zA-Z\s]+$',  # "Phase I: Business Planning"
-            r'^What\s+could\s+the\s+ODL\s+really\s+mean\?\s*$',
-            r'^Milestones\s*$',
+            r'^\d+\.\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^[•\-\*]\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^\([a-z\d]+\)\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^(What|How|Why|When|Where|Who)\s+[a-z][a-zA-Z\s]{5,}\??\s*$',
         ]
         
-        # H4 patterns
         h4_patterns = [
-            r'^For\s+each\s+[A-Z][a-zA-Z\s]+\s+it\s+could\s+mean:\s*$',
+            r'^\d+\.\d+\.\d+\.\d+\s+[A-Z][a-zA-Z\s]{3,}$',
+            
+            r'^[A-Z][a-z]+\s+[A-Z][a-z]+\s*:?\s*$',
         ]
         
         for pattern in h1_patterns:
-            if re.match(pattern, text):
+            if re.match(pattern, text, re.IGNORECASE):
                 return "H1"
         
         for pattern in h2_patterns:
-            if re.match(pattern, text):
+            if re.match(pattern, text, re.IGNORECASE):
                 return "H2"
                 
         for pattern in h3_patterns:
-            if re.match(pattern, text):
+            if re.match(pattern, text, re.IGNORECASE):
                 return "H3"
                 
         for pattern in h4_patterns:
-            if re.match(pattern, text):
+            if re.match(pattern, text, re.IGNORECASE):
                 return "H4"
         
-        return None
+        return self._classify_by_heuristics(text)
 
-    def _classify_stem_heading(self, text: str) -> str:
-        """STEM document heading patterns"""
-        if re.match(r'^PATHWAY\s+OPTIONS\s*$', text):
+    def _classify_by_heuristics(self, text: str) -> str:
+        words = text.split()
+        word_count = len(words)
+        
+        if word_count > 20:
+            return None
+            
+        if word_count < 2:
+            return None
+            
+        is_title_case = all(word[0].isupper() for word in words if word.isalpha())
+        is_all_caps = text.isupper()
+        has_numbers = any(char.isdigit() for char in text)
+        
+        if is_all_caps and 5 <= word_count <= 10:
             return "H1"
-        return None
-
-    def _classify_invitation_heading(self, text: str) -> str:
-        """Invitation heading patterns"""
-        if re.match(r'^HOPE\s+[Tt]o\s+SEE\s+[Yy]ou\s+THERE!\s*$', text):
-            return "H1"
+            
+        if is_title_case and 3 <= word_count <= 8:
+            if has_numbers:
+                return "H2"
+            else:
+                return "H3"
+        
+        if text.endswith(':') and word_count <= 8:
+            return "H3"
+            
         return None

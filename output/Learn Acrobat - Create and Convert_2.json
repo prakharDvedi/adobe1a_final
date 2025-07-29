@@ -1,0 +1,385 @@
+{
+  "title": "Select Visio layers to convert (Acrobat Pro)",
+  "outline": [
+    {
+      "level": "H2",
+      "text": "of the following:",
+      "page": 0
+    },
+    {
+      "level": "H3",
+      "text": "• To convert the selected Visio layers to individual PDF layers within a PDF layer",
+      "page": 0
+    },
+    {
+      "level": "H3",
+      "text": "4. Optionally, do any of the following:",
+      "page": 0
+    },
+    {
+      "level": "H1",
+      "text": "Convert AutoCAD files when AutoCAD is installed",
+      "page": 2
+    },
+    {
+      "level": "H3",
+      "text": "2. Do one of the following:",
+      "page": 2
+    },
+    {
+      "level": "H2",
+      "text": "then click Continue:",
+      "page": 2
+    },
+    {
+      "level": "H1",
+      "text": "Select AutoCAD layers to convert",
+      "page": 3
+    },
+    {
+      "level": "H2",
+      "text": "following:",
+      "page": 3
+    },
+    {
+      "level": "H3",
+      "text": "• Choose an option from the Named Layer Filters menu to list all layers that fit",
+      "page": 3
+    },
+    {
+      "level": "H3",
+      "text": "• Select the Invert option to list all layers except those layers that are described",
+      "page": 3
+    },
+    {
+      "level": "H3",
+      "text": "• To convert the selected AutoCAD layers to individual layers within a PDF layer",
+      "page": 3
+    },
+    {
+      "level": "H1",
+      "text": "Convert AutoCAD files in batches",
+      "page": 4
+    },
+    {
+      "level": "H2",
+      "text": "1. Choose Adobe PDF > Batch Conversion.",
+      "page": 4
+    },
+    {
+      "level": "H2",
+      "text": "4. Click Convert.",
+      "page": 4
+    },
+    {
+      "level": "H1",
+      "text": "Application-specific PDFMaker settings",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Attach Source File",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Create Bookmarks",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Add Links",
+      "page": 5
+    },
+    {
+      "level": "H3",
+      "text": "Enable Accessibility And Reflow With Tagged Adobe PDF",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Excel-specific options on the Settings tab",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Convert Comments",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Actual Size",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Fit Worksheet To A Single Page",
+      "page": 5
+    },
+    {
+      "level": "H1",
+      "text": "Fit To Paper Width",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Prompt For Selecting Excel Sheets",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "PowerPoint-specific options on the Settings tab",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Preserve Slide Transitions",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Convert Hidden Slides To PDF Pages",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Convert Speaker Notes",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Email-specific options on the Settings tab",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Compatibility",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Attachments",
+      "page": 6
+    },
+    {
+      "level": "H1",
+      "text": "Do Not Include Folder Name Information",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Embed Index For Faster Search",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Block Download Of External Content",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Page Layout options",
+      "page": 7
+    },
+    {
+      "level": "H3",
+      "text": "Show This Number Of Recent Archives (Outlook only)",
+      "page": 7
+    },
+    {
+      "level": "H3",
+      "text": "Show “Attach As Adobe PDF” Buttons",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Compliance Standard",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Open Layers Pane When Viewed In Acrobat",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Embed Scale Information",
+      "page": 7
+    },
+    {
+      "level": "H2",
+      "text": "Do Not Convert Model Space To 3D",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Choose Layout Option",
+      "page": 7
+    },
+    {
+      "level": "H1",
+      "text": "Exclude Model Space",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Choose Layer Option",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Exclude Visio Objects With No Custom Properties",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Convert Comments To Adobe PDF Comments",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Always Flatten Layers In Adobe PDF",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Convert Displayed Comments To Notes In Adobe PDF",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Reviewer",
+      "page": 8
+    },
+    {
+      "level": "H1",
+      "text": "Include",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Notes Open",
+      "page": 9
+    },
+    {
+      "level": "H3",
+      "text": "# Of Comments",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Convert Footnote And Endnote Links",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Convert signature fields specified by pdfmarks",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Enable Advanced Tagging",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Convert Word Headings To Bookmarks",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Convert Word Styles To Bookmarks",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Convert Word Bookmarks",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Element list",
+      "page": 9
+    },
+    {
+      "level": "H1",
+      "text": "Element",
+      "page": 10
+    },
+    {
+      "level": "H1",
+      "text": "Bookmark",
+      "page": 10
+    },
+    {
+      "level": "H1",
+      "text": "Create PDFs by printing to file",
+      "page": 11
+    },
+    {
+      "level": "H2",
+      "text": "5. Click Continue.",
+      "page": 12
+    },
+    {
+      "level": "H1",
+      "text": "Adobe PDFConversion Settings",
+      "page": 14
+    },
+    {
+      "level": "H1",
+      "text": "Adobe PDF Security",
+      "page": 14
+    },
+    {
+      "level": "H2",
+      "text": "the security settings:",
+      "page": 14
+    },
+    {
+      "level": "H1",
+      "text": "Adobe PDF Output Folder",
+      "page": 14
+    },
+    {
+      "level": "H1",
+      "text": "Adobe PDF Page Size menu",
+      "page": 15
+    },
+    {
+      "level": "H1",
+      "text": "Replace Existing PDF",
+      "page": 15
+    },
+    {
+      "level": "H1",
+      "text": "View Adobe PDF Results",
+      "page": 15
+    },
+    {
+      "level": "H1",
+      "text": "Add Document Information",
+      "page": 15
+    },
+    {
+      "level": "H1",
+      "text": "Delete Log Files For Successful Jobs",
+      "page": 15
+    },
+    {
+      "level": "H1",
+      "text": "Set Adobe PDF printer properties",
+      "page": 16
+    },
+    {
+      "level": "H2",
+      "text": "2. Choose Properties.",
+      "page": 16
+    },
+    {
+      "level": "H1",
+      "text": "Reassign the port that the Adobe PDF printer uses",
+      "page": 16
+    }
+  ]
+}
